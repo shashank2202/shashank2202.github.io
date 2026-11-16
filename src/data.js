@@ -1,4 +1,4 @@
-// Public files resolve against the deploy base (a subfolder on GitHub Pages).
+// Public files resolve against the deploy base (vite `base`).
 export const asset = (path) => `${import.meta.env.BASE_URL}${path}`
 
 export const profile = {
