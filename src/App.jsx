@@ -335,42 +335,130 @@ function Screen({ type }) {
   )
 }
 
+// Window tilts gently toward the pointer; CSS transition does the easing.
+function tilt(e) {
+  const el = e.currentTarget
+  const r = el.getBoundingClientRect()
+  el.style.setProperty('--ry', `${((e.clientX - r.left) / r.width - 0.5) * 8}deg`)
+  el.style.setProperty('--rx', `${((e.clientY - r.top) / r.height - 0.5) * -6}deg`)
+}
+function untilt(e) {
+  e.currentTarget.style.setProperty('--rx', '0deg')
+  e.currentTarget.style.setProperty('--ry', '0deg')
+}
+
 function Work() {
+  const list = useRef(null)
+
+  // Stacking cards: as the next card slides over, the current one recedes.
+  useEffect(() => {
+    if (reduceMotion()) return
+    const cards = [...list.current.querySelectorAll('[data-card]')]
+    let ticking = false
+    const update = () => {
+      ticking = false
+      const vh = window.innerHeight
+      cards.forEach((card, i) => {
+        const next = cards[i + 1]
+        const inner = card.firstElementChild
+        if (!next || window.innerWidth < 768) {
+          inner.style.transform = ''
+          inner.style.filter = ''
+          return
+        }
+        const t = clamp(1 - (next.getBoundingClientRect().top - card.getBoundingClientRect().top) / (vh * 0.9))
+        inner.style.transform = `scale(${(1 - t * 0.07).toFixed(4)}) translate3d(0, ${(-t * 2).toFixed(2)}vh, 0)`
+        inner.style.filter = `brightness(${(1 - t * 0.35).toFixed(3)})`
+      })
+    }
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true
+        requestAnimationFrame(update)
+      }
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [])
+
   return (
     <section id="work" data-section-theme="light" className="relative px-6 pt-[14vh] pb-[10vh]">
       <div className="grid-lines pointer-events-none absolute inset-x-6 inset-y-0" />
-      <Rise lines={['Selected Work']} className="relative text-[clamp(3.5rem,11.2vw,11.5rem)] leading-[0.9] font-medium tracking-[-0.05em]" />
+      <div className="relative flex flex-wrap items-end justify-between gap-6 md:flex-nowrap">
+        <div className="flex items-start gap-3">
+          <Rise lines={['Selected Work']} className="text-[clamp(3.5rem,11.2vw,11.5rem)] leading-[0.9] font-medium tracking-[-0.05em]" />
+          <span data-reveal className="fade-up muted mt-[1.2vw] font-mono text-[clamp(0.9rem,1.4vw,1.4rem)]" style={{ '--d': '0.3s' }}>
+            ({String(work.length).padStart(2, '0')})
+          </span>
+        </div>
+        <p data-reveal className="fade-up muted max-w-[16rem] pb-[1vw] text-[1.05rem] leading-snug md:ml-auto md:text-right" style={{ '--d': '0.2s' }}>
+          Production work at Wipro DTS, and the projects I build to sharpen the same skills.
+        </p>
+      </div>
 
-      <div className="relative mt-[10vh] space-y-[16vh]">
-        {work.map((p) => (
-          <article key={p.name}>
-            <div data-parallax className="relative aspect-[4/3] overflow-hidden rounded-[4px] sm:aspect-[16/9] md:aspect-[2.1/1]">
-              <div className="parallax-inner absolute inset-0 will-change-transform">
-                <MeshGradient
-                  colors={p.colors}
-                  distortion={0.85}
-                  swirl={0.25}
-                  speed={0.18}
-                  grainOverlay={0.12}
-                  style={{ width: '100%', height: '100%' }}
-                />
-                <div className="absolute inset-0 grid place-items-center">
-                  <Screen type={p.screen} />
+      <div ref={list} className="relative mt-[8vh] space-y-[6vh] md:space-y-[10vh]">
+        {work.map((p, i) => (
+          <article key={p.name} data-card className="md:sticky md:top-[9vh]">
+            <div className="origin-top rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-2.5 will-change-transform md:p-3">
+              <div
+                className="group relative h-[52vh] overflow-hidden rounded-xl md:h-[60vh]"
+                onPointerMove={tilt}
+                onPointerLeave={untilt}
+                style={{ perspective: '1200px' }}
+              >
+                <MeshGradient colors={p.colors} distortion={0.85} swirl={0.25} speed={0.18} grainOverlay={0.12} style={{ width: '100%', height: '100%' }} />
+
+                <div className="absolute top-4 left-4 flex items-center gap-2 rounded-full bg-black/25 px-3 py-1.5 text-[0.78rem] text-white backdrop-blur-md md:top-5 md:left-5">
+                  <span className="font-mono">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="opacity-50">—</span>
+                  {p.kind}
+                </div>
+
+                <div className="absolute right-5 bottom-5 left-5 hidden max-w-[15rem] text-white lg:block">
+                  <div className="text-[clamp(3rem,5vw,4.75rem)] leading-none font-medium tracking-[-0.05em]">{p.stat[0]}</div>
+                  <div className="mt-2 text-sm leading-snug text-white/75">{p.stat[1]}</div>
+                </div>
+
+                <div className="absolute inset-0 grid place-items-center lg:pl-[12%]">
+                  <div
+                    className="flex w-full justify-center transition-transform duration-700 ease-out-expo"
+                    style={{ transform: 'rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))' }}
+                  >
+                    <Screen type={p.screen} />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div data-reveal className="mt-8 grid gap-4 md:grid-cols-12 md:gap-6">
-              <h3 className="fade-up text-[clamp(1.6rem,2.2vw,2.2rem)] tracking-[-0.02em] md:col-span-3">{p.name}</h3>
-              <p className="fade-up text-[0.95rem] leading-relaxed opacity-75 md:col-span-5" style={{ '--d': '0.06s' }}>
-                {p.desc}
-              </p>
-              <div className="fade-up text-sm md:col-span-1 md:col-start-10" style={{ '--d': '0.12s' }}>
-                <div className="muted">Year</div>
-                <div className="mt-1">{p.year}</div>
-              </div>
-              <div className="fade-up text-sm md:col-span-2" style={{ '--d': '0.18s' }}>
-                <div className="muted">Role</div>
-                <div className="mt-1">{p.role}</div>
+
+              <div className="grid gap-5 px-2 pt-6 pb-3 md:grid-cols-12 md:gap-6 md:px-3">
+                <div className="md:col-span-3">
+                  <h3 className="text-[clamp(1.6rem,2.3vw,2.3rem)] leading-tight tracking-[-0.025em]">{p.name}</h3>
+                  <div className="mt-1 text-sm lg:hidden">
+                    <span className="font-medium">{p.stat[0]}</span> <span className="muted">{p.stat[1]}</span>
+                  </div>
+                </div>
+                <p className="text-[0.95rem] leading-relaxed opacity-75 md:col-span-5">{p.desc}</p>
+                <div className="grid grid-cols-2 gap-4 text-sm md:col-span-4 md:grid-cols-[auto_1fr] md:gap-x-8">
+                  <div>
+                    <div className="muted">Year</div>
+                    <div className="mt-1">{p.year}</div>
+                  </div>
+                  <div>
+                    <div className="muted">Role</div>
+                    <div className="mt-1">{p.role}</div>
+                  </div>
+                  <ul className="col-span-2 flex flex-wrap gap-1.5">
+                    {p.stack.map((t) => (
+                      <li key={t} className="rounded-full border border-[var(--line)] px-2.5 py-0.5 text-[0.75rem]">
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           </article>
@@ -727,7 +815,6 @@ export default function App() {
     const reduce = reduceMotion()
     const sections = [...document.querySelectorAll('[data-section-theme]')]
     const scrubs = [...document.querySelectorAll('[data-scrub]')].map((el) => ({ el, words: [...el.querySelectorAll('.scrub-word')] }))
-    const parallax = [...document.querySelectorAll('[data-parallax]')].map((el) => ({ el, inner: el.querySelector('.parallax-inner') }))
     const heroContent = document.querySelector('.hero-content')
     const heroBg = document.querySelector('.hero-bg')
     let wasDocked = false
@@ -760,13 +847,6 @@ export default function App() {
         const prog = clamp((vh * 0.85 - r.top) / (r.height + vh * 0.35))
         const n = words.length
         words.forEach((w, i) => w.style.setProperty('--p', clamp((prog * (n + 6) - i) / 6).toFixed(3)))
-      }
-
-      for (const { el, inner } of parallax) {
-        const r = el.getBoundingClientRect()
-        if (r.bottom < 0 || r.top > vh) continue
-        const t = clamp((vh - r.top) / (vh + r.height))
-        inner.style.transform = `scale(${(1.14 - Math.min(t / 0.6, 1) * 0.14).toFixed(4)})`
       }
     }
 

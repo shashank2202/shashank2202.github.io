@@ -28,6 +28,9 @@ export const approach = [
 export const work = [
   {
     name: 'Xytech Platform',
+    kind: 'Infrastructure / operations',
+    stat: ['81', 'manual Route 53 alarms traced to misrouted SNS targets'],
+    stack: ['AWS', 'OpenTofu', 'MSSQL / RDS', 'CloudWatch', 'PagerDuty', 'Transfer Family'],
     desc: 'A multi-tenant SaaS product on AWS across dev, staging and production. I run its infrastructure as code, built Data Access Services on MSSQL replicas, and traced 81 manual Route 53 alarms to misrouted SNS targets.',
     year: '2025 —',
     role: 'DevOps Engineer, Wipro DTS',
@@ -36,6 +39,9 @@ export const work = [
   },
   {
     name: 'AWS on Terraform',
+    kind: 'Infrastructure as code / CI',
+    stat: ['0', 'long-lived IAM keys — the pipeline deploys through OIDC'],
+    stack: ['Terraform', 'VPC', 'ALB + ASG', 'RDS PostgreSQL', 'GitHub Actions', 'Checkov'],
     desc: 'A production-style stack: multi-AZ VPC, ALB, Auto Scaling and RDS PostgreSQL from reusable modules, shipped by a GitHub Actions pipeline that plans on PR and applies on merge through OIDC.',
     year: '2026',
     role: 'Personal project',
@@ -44,6 +50,9 @@ export const work = [
   },
   {
     name: 'GitOps on Kubernetes',
+    kind: 'Containers / delivery',
+    stat: ['1', 'git revert to roll back a release'],
+    stack: ['Docker', 'Kubernetes', 'Helm', 'ArgoCD', 'Amazon ECR'],
     desc: 'A containerised service built, scanned and pushed to ECR, then deployed with Helm and ArgoCD auto-sync and self-heal, so releases and rollbacks happen through Git.',
     year: '2026',
     role: 'Personal project',
@@ -52,6 +61,9 @@ export const work = [
   },
   {
     name: 'DevOps Internship',
+    kind: 'Monitoring / pipelines',
+    stat: ['5 mo', 'on a production multi-tenant AWS platform'],
+    stack: ['Terraform', 'EC2 / RDS', 'CloudWatch', 'GitHub Actions', 'Python'],
     desc: 'Peer-reviewed Terraform changes on a multi-tenant AWS platform, CloudWatch and RDS/EC2 monitoring, and fixing failing CI/CD builds with small Python checks.',
     year: '2025',
     role: 'DevOps Intern, Wipro DTS',

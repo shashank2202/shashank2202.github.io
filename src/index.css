@@ -53,12 +53,13 @@ body {
 .rise-line {
   display: block;
   overflow: hidden;
-  padding-bottom: 0.06em;
-  margin-bottom: -0.06em;
+  /* room for descenders (g, y, p) inside the mask */
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
 }
 .rise-line > span {
   display: block;
-  transform: translate3d(0, 105%, 0);
+  transform: translate3d(0, calc(100% + 0.25em), 0);
   transition: transform 0.72s var(--ease-out-expo);
   transition-delay: var(--d, 0s);
 }
