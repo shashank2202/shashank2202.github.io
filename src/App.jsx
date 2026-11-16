@@ -185,14 +185,21 @@ function Hero() {
 function Portrait() {
   const [failed, setFailed] = useState(false)
   return (
-    <div className="relative aspect-square overflow-hidden rounded-sm bg-neutral-800">
+    <div className="relative aspect-[5/6] overflow-hidden rounded-sm bg-neutral-800">
       {failed ? (
         <>
           <img src={asset('hero-src.jpg')} alt="" className="absolute inset-0 size-full scale-125 object-cover blur-md" />
           <span className="absolute inset-0 grid place-items-center text-[9rem] font-medium tracking-[-0.06em] text-white/90">Sg</span>
         </>
       ) : (
-        <img src={profile.portrait} alt="Shashank Gowda" onError={() => setFailed(true)} className="absolute inset-0 size-full object-cover" />
+        <img
+          src={profile.portrait}
+          alt="Shashank Gowda"
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailed(true)}
+          className="absolute inset-0 size-full object-cover object-[50%_35%]"
+        />
       )}
     </div>
   )
@@ -212,7 +219,7 @@ function About() {
   const words = (s) => s.split(' ').map((w, i) => <span key={s + i} className="scrub-word">{w} </span>)
   return (
     <section data-section-theme="dark" className="px-6 py-[18vh]">
-      <div className="grid gap-12 md:grid-cols-12 md:gap-6">
+      <div className="grid gap-12 md:grid-cols-12 md:items-center md:gap-6">
         <div data-reveal className="fade-up md:col-span-4">
           <Portrait />
         </div>
