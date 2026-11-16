@@ -63,6 +63,7 @@ export const work = [
 export const process = [
   {
     step: 'Code',
+    tools: ['OpenTofu', 'Terraform', 'Shared modules', 'S3 state + locking'],
     text: [
       ['Everything starts as '],
       ['code', true],
@@ -73,6 +74,7 @@ export const process = [
   },
   {
     step: 'Review',
+    tools: ['tflint', 'Checkov', 'Plan on PR', 'Repo risk reviews'],
     text: [
       ['Every change opens a PR that runs fmt, validate, '],
       ['tflint and Checkov', true],
@@ -83,6 +85,7 @@ export const process = [
   },
   {
     step: 'Ship',
+    tools: ['GitHub Actions', 'Azure DevOps', 'OIDC', 'ArgoCD'],
     text: [
       ['Merges apply through GitHub Actions or Azure DevOps using '],
       ['OIDC', true],
@@ -93,6 +96,7 @@ export const process = [
   },
   {
     step: 'Watch',
+    tools: ['CloudWatch', 'PagerDuty', 'SNS', 'RDS / EC2'],
     text: [
       ['Alarms live in code too. I triage '],
       ['CloudWatch and PagerDuty', true],

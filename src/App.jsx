@@ -380,39 +380,272 @@ function Work() {
   )
 }
 
-const thumbs = {
-  Code: ['#ffd9c2', '{ }'],
-  Review: ['#e3f7c2', 'PR ✓'],
-  Ship: ['#d6defc', '→ prod'],
-  Watch: ['#f3d9ff', '● 0'],
+const tints = ['#ffe3d3', '#e6f6c9', '#dbe2fd', '#f1defd']
+const accents = ['#ff5a1a', '#5b9a1e', '#3b5bdb', '#a23fd6']
+
+function Card({ title, children, className = '' }) {
+  return (
+    <div className={`overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-[0_30px_60px_-30px_rgba(20,10,20,0.35)] ${className}`}>
+      <div className="flex items-center gap-1.5 border-b border-black/[0.06] px-4 py-2.5">
+        <span className="size-2 rounded-full bg-black/10" />
+        <span className="size-2 rounded-full bg-black/10" />
+        <span className="size-2 rounded-full bg-black/10" />
+        <span className="ml-2 font-mono text-[0.68rem] text-black/45">{title}</span>
+      </div>
+      <div className="p-4 font-mono text-[0.72rem] leading-[1.7] text-black/75 sm:text-[0.78rem]">{children}</div>
+    </div>
+  )
+}
+
+const k = (t) => <span className="text-[#a23fd6]">{t}</span>
+const str = (t) => <span className="text-[#5b9a1e]">{t}</span>
+const dim = (t) => <span className="text-black/35">{t}</span>
+
+function CodeVisual() {
+  return (
+    <Card title="clients/acme/main.tf">
+      <div>
+        {k('module')} {str('"rds"')} {'{'}
+      </div>
+      <div className="pl-4">
+        source &nbsp;&nbsp;= {str('"git::…/modules/rds?ref=<tag>"')}
+      </div>
+      <div className="pl-4">client &nbsp;&nbsp;= var.client</div>
+      <div className="pl-4">multi_az = {k('true')}</div>
+      <div>{'}'}</div>
+      <div className="mt-2">
+        {k('terraform')} {'{'}
+      </div>
+      <div className="pl-4">
+        {k('backend')} {str('"s3"')} {'{'} encrypt = {k('true')} {'}'}
+      </div>
+      <div>{'}'}</div>
+      <div className="mt-2">{dim('# no click-ops — the repo is the environment')}</div>
+    </Card>
+  )
+}
+
+function ReviewVisual() {
+  return (
+    <Card title="pull request · infra">
+      <div className="mb-3 font-sans text-[0.85rem] font-medium text-black/85">Pin prod to a tagged module release</div>
+      {['terraform fmt', 'terraform validate', 'tflint', 'checkov'].map((c, i) => (
+        <div key={c} className="step-row flex items-center justify-between border-b border-black/[0.06] py-1.5 last:border-0" style={{ '--i': i }}>
+          <span>{c}</span>
+          <span className="rounded-full bg-[#e6f6c9] px-2 text-[#3f7a10]">passed</span>
+        </div>
+      ))}
+      <div className="step-row mt-3 rounded-md bg-black/[0.035] px-3 py-2" style={{ '--i': 4 }}>
+        {dim('bot:')} plan posted · review before merge
+      </div>
+    </Card>
+  )
+}
+
+function ShipVisual() {
+  const nodes = ['merge', 'OIDC role', 'apply', 'ArgoCD sync']
+  return (
+    <Card title="deploy · main">
+      <div className="relative py-6">
+        <div className="absolute top-1/2 right-6 left-6 h-px -translate-y-1/2 bg-black/10" />
+        <div className="ship-pulse absolute top-1/2 left-6 size-2.5 -translate-y-1/2 rounded-full bg-[#3b5bdb] shadow-[0_0_0_6px_rgba(59,91,219,0.15)]" />
+        <div className="relative flex justify-between">
+          {nodes.map((n, i) => (
+            <div key={n} className="step-row flex flex-col items-center gap-2" style={{ '--i': i }}>
+              <span className="grid size-9 place-items-center rounded-full border border-black/10 bg-white text-[0.7rem]">{i + 1}</span>
+              <span className="text-[0.66rem] whitespace-nowrap text-black/60">{n}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex justify-between border-t border-black/[0.06] pt-3">
+        <span>{dim('long-lived keys')}</span>
+        <span className="text-black/85">none</span>
+      </div>
+      <div className="flex justify-between">
+        <span>{dim('rollback')}</span>
+        <span className="text-black/85">git revert</span>
+      </div>
+    </Card>
+  )
+}
+
+function WatchVisual() {
+  return (
+    <Card title="cloudwatch · rds-freeable-memory">
+      <svg viewBox="0 0 300 110" className="w-full">
+        <line x1="0" y1="28" x2="300" y2="28" stroke="#ff5a1a" strokeDasharray="4 4" strokeWidth="1" />
+        <text x="296" y="22" textAnchor="end" fontSize="9" fill="#ff5a1a">
+          threshold
+        </text>
+        <path
+          className="watch-line"
+          d="M0 80 C 30 76, 45 70, 70 72 S 110 60, 130 64 S 170 40, 190 46 S 225 70, 250 62 S 285 58, 300 60"
+          fill="none"
+          stroke="#a23fd6"
+          strokeWidth="2"
+          pathLength="1"
+        />
+      </svg>
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        {[
+          ['RDS memory', 'OK'],
+          ['RDS storage', 'OK'],
+          ['EC2 status', 'OK'],
+          ['PagerDuty', 'quiet'],
+        ].map(([a, b], i) => (
+          <div key={a} className="step-row flex justify-between rounded-md bg-black/[0.035] px-2.5 py-1.5" style={{ '--i': i }}>
+            <span>{a}</span>
+            <span className="text-[#3f7a10]">{b}</span>
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+}
+
+const visuals = [CodeVisual, ReviewVisual, ShipVisual, WatchVisual]
+
+function StepVisual({ i }) {
+  const V = visuals[i]
+  return (
+    <div className="relative grid size-full place-items-center p-[7%]" style={{ background: tints[i] }}>
+      <div
+        className="pointer-events-none absolute right-[5%] -bottom-[6%] text-[clamp(9rem,16vw,15rem)] leading-none font-medium tracking-[-0.06em] opacity-[0.12]"
+        style={{ color: accents[i] }}
+      >
+        {i + 1}
+      </div>
+      <div className="relative w-full max-w-[26rem]">
+        <V />
+      </div>
+    </div>
+  )
 }
 
 function Process() {
+  const [active, setActive] = useState(0)
+  const [progress, setProgress] = useState(0)
+  const stepsRef = useRef(null)
+
+  useEffect(() => {
+    const steps = [...stepsRef.current.querySelectorAll('[data-step]')]
+    let ticking = false
+    const update = () => {
+      ticking = false
+      const mid = window.innerHeight * 0.5
+      let best = 0
+      let bestD = Infinity
+      steps.forEach((s, i) => {
+        const r = s.getBoundingClientRect()
+        const d = Math.abs(r.top + r.height / 2 - mid)
+        if (d < bestD) (bestD = d), (best = i)
+      })
+      setActive(best)
+      const r = stepsRef.current.getBoundingClientRect()
+      setProgress(clamp((mid - r.top) / r.height))
+    }
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true
+        requestAnimationFrame(update)
+      }
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [])
+
   return (
-    <section id="process" data-section-theme="light" className="px-6 pt-[12vh] pb-[16vh]">
-      <Rise lines={['How I run infrastructure']} className="text-[clamp(2.6rem,6vw,6.2rem)] leading-[0.95] font-medium tracking-[-0.045em]" />
-      <div className="mt-[8vh]">
-        {process.map((s, i) => {
-          const [bg, glyph] = thumbs[s.step]
-          return (
-            <div key={s.step} data-reveal className="grid gap-6 border-t border-[var(--line)] py-10 md:grid-cols-12">
-              <h3 className="fade-up text-[clamp(1.6rem,2.3vw,2.3rem)] tracking-[-0.02em] md:col-span-5">
-                {i + 1}. {s.step}
-              </h3>
-              <div className="fade-up md:col-span-2" style={{ '--d': '0.06s' }}>
+    <section id="process" data-section-theme="light" className="px-6 pt-[12vh] pb-[12vh]">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <Rise lines={['How I run', 'infrastructure']} className="text-[clamp(2.6rem,6vw,6.2rem)] leading-[0.95] font-medium tracking-[-0.045em]" />
+        <p data-reveal className="fade-up muted max-w-sm text-[1.05rem] leading-snug">
+          Four habits that keep a multi-tenant platform predictable — from the first line of code to the alarm that never fires.
+        </p>
+      </div>
+
+      <div className="mt-[8vh] grid gap-10 md:grid-cols-12 md:gap-6">
+        {/* Sticky visual that swaps with the active step (desktop). */}
+        <div className="hidden md:col-span-6 md:block">
+          <div className="sticky top-[16vh]">
+            <div className="relative aspect-[5/4] overflow-hidden rounded-xl">
+              {visuals.map((_, i) => (
                 <div
-                  className="grid aspect-[4/3] w-28 place-items-center rounded-md font-mono text-sm text-black/70 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)]"
-                  style={{ background: bg }}
+                  key={i}
+                  className={`step-panel absolute inset-0 transition-[opacity,transform,filter] duration-700 ease-out-expo ${
+                    i === active ? 'is-active scale-100 opacity-100 blur-0' : 'scale-[0.97] opacity-0 blur-sm'
+                  }`}
+                  aria-hidden={i !== active}
                 >
-                  {glyph}
+                  <StepVisual i={i} />
                 </div>
-              </div>
-              <p className="fade-up text-[clamp(1.1rem,1.55vw,1.5rem)] leading-[1.3] tracking-[-0.01em] md:col-span-5" style={{ '--d': '0.12s' }}>
-                <Rich parts={s.text} />
-              </p>
+              ))}
             </div>
-          )
-        })}
+            <div className="mt-5 flex items-center gap-4 text-sm">
+              <span className="font-mono tabular-nums">
+                0{active + 1} <span className="muted">/ 0{process.length}</span>
+              </span>
+              <div className="flex flex-1 gap-1.5">
+                {process.map((s, i) => (
+                  <span
+                    key={s.step}
+                    className="h-[3px] flex-1 rounded-full transition-colors duration-500"
+                    style={{ background: i <= active ? accents[active] : 'var(--line)' }}
+                  />
+                ))}
+              </div>
+              <span className="muted">{process[active].step}</span>
+            </div>
+          </div>
+        </div>
+
+        <ol ref={stepsRef} className="relative md:col-span-5 md:col-start-8">
+          <span className="absolute top-0 bottom-0 left-0 hidden w-px bg-[var(--line)] md:block" />
+          <span
+            className="absolute top-0 left-0 hidden w-px origin-top md:block"
+            style={{ height: '100%', transform: `scaleY(${progress})`, background: accents[active], transition: 'background 0.5s' }}
+          />
+          {process.map((s, i) => {
+            const on = i === active
+            return (
+              <li
+                key={s.step}
+                data-step
+                className={`flex flex-col justify-center py-10 transition-opacity duration-500 md:min-h-[72vh] md:py-0 md:pl-10 ${
+                  on ? 'opacity-100' : 'md:opacity-35'
+                }`}
+              >
+                <div className="mb-6 overflow-hidden rounded-xl md:hidden">
+                  <div className="step-panel is-active py-6">
+                    <StepVisual i={i} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 font-mono text-sm">
+                  <span className="grid size-7 place-items-center rounded-full text-white transition-colors duration-500" style={{ background: on ? accents[i] : 'var(--muted)' }}>
+                    {i + 1}
+                  </span>
+                  <span className="muted">Step 0{i + 1}</span>
+                </div>
+                <h3 className="mt-4 text-[clamp(2.2rem,3.6vw,3.6rem)] leading-none font-medium tracking-[-0.04em]">{s.step}</h3>
+                <p className="mt-5 text-[clamp(1.08rem,1.4vw,1.35rem)] leading-[1.4] tracking-[-0.01em]">
+                  <Rich parts={s.text} />
+                </p>
+                <ul className="mt-6 flex flex-wrap gap-2">
+                  {s.tools.map((t) => (
+                    <li key={t} className="rounded-full border border-[var(--line)] px-3 py-1 text-[0.8rem]">
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            )
+          })}
+        </ol>
       </div>
     </section>
   )
