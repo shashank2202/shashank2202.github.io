@@ -1,3 +1,6 @@
+// Public files resolve against the deploy base (a subfolder on GitHub Pages).
+export const asset = (path) => `${import.meta.env.BASE_URL}${path}`
+
 export const profile = {
   first: 'Shashank',
   last: 'Gowda',
@@ -8,8 +11,8 @@ export const profile = {
   email: 'shashanknakshatra@gmail.com',
   linkedin: 'https://linkedin.com/in/sgn2202',
   github: 'https://github.com/shashank2202',
-  resume: '/Shashank_Gowda_Resume.pdf',
-  portrait: '/portrait.jpg',
+  resume: asset('Shashank_Gowda_Resume.pdf'),
+  portrait: asset('portrait.jpg'),
 }
 
 // Bold spans render at full strength, the rest muted (reference style).

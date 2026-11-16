@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { FlutedGlass, LiquidMetal, MeshGradient } from '@paper-design/shaders-react'
-import { approach, process, profile, work } from './data'
+import { approach, asset, process, profile, work } from './data'
 
 const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v))
@@ -114,7 +114,7 @@ function Hero() {
       <div className="hero-bg absolute inset-0 will-change-transform">
         <FlutedGlass
           ref={glass}
-          image="/hero-src.jpg"
+          image={asset('hero-src.jpg')}
           fit="cover"
           scale={1.25}
           shape="linesIrregular"
@@ -188,7 +188,7 @@ function Portrait() {
     <div className="relative aspect-square overflow-hidden rounded-sm bg-neutral-800">
       {failed ? (
         <>
-          <img src="/hero-src.jpg" alt="" className="absolute inset-0 size-full scale-125 object-cover blur-md" />
+          <img src={asset('hero-src.jpg')} alt="" className="absolute inset-0 size-full scale-125 object-cover blur-md" />
           <span className="absolute inset-0 grid place-items-center text-[9rem] font-medium tracking-[-0.06em] text-white/90">Sg</span>
         </>
       ) : (
@@ -745,7 +745,7 @@ function Footer() {
       <div className="grid-lines pointer-events-none absolute inset-x-6 inset-y-0" />
       <div className="relative mx-auto h-[min(80vh,760px)] max-w-5xl">
         <LiquidMetal
-          image="/monogram.png"
+          image={asset('monogram.png')}
           colorBack="#fbfbff00"
           colorTint="#ffffff"
           repetition={2}
